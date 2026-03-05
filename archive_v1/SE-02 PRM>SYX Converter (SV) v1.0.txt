@@ -1,0 +1,206 @@
+SE-02 PRM → SYX Converter
+User Manual
+Version 1.0
+
+
+1. Bakgrund – varför verktyget skapades
+---------------------------------------
+
+Roland SE-02 erbjuder två olika sätt att exportera patchdata:
+
+1. USB Mass Storage (.PRM)
+2. SysEx Patch Dumps (.SYX)
+
+Problemet är att dessa två format inte är kompatibla med varandra.
+
+
+PRM (Patch Resource Memory)
+
+När SE-02 startas i USB-läge (håll [2] vid uppstart) exponeras patcharna som:
+
+PATCH/SE02_PATCH1.PRM
+PATCH/SE02_PATCH2.PRM
+...
+
+PRM-filerna är ett textbaserat parameterformat som listar alla syntparametrar:
+
+FLT_CUTOFF(60);
+MIX_OSC1(162);
+LFO_RATE(122);
+
+Detta format är enkelt att läsa och redigera, men:
+
+- det är inte kompatibelt med SysEx-baserade librarians
+- det kan inte skickas direkt till synthen via MIDI
+
+
+
+SysEx (.SYX)
+
+Librarians och editors, t.ex.:
+
+- KnobKraft Orm
+- MIDI tools
+- andra patch managers
+
+använder istället SysEx patch dumps.
+
+En SE-02 patch består av:
+
+4 Roland DT1 messages
+
+med en sammanlagd payload på:
+
+120 bytes
+
+där varje byte är Roland nibble-encoded i SysEx.
+
+
+
+Problemet
+
+Det finns ingen officiell konverterare mellan:
+
+PRM → SYX
+
+Det gör att patchar från USB-backupen inte kan importeras i librarians.
+
+
+
+Lösningen
+
+PRM→SYX Converter löser detta genom att:
+
+1. läsa PRM-parametrar
+2. mappa varje parameter till rätt payload-byte
+3. konvertera till Roland SysEx-format
+4. beräkna korrekt checksum
+5. skapa en valid SE-02 patch SysEx
+
+Resultatet kan sedan användas i:
+
+- KnobKraft Orm
+- MIDI Librarians
+- direkt MIDI-överföring till synthen
+
+
+
+2. Hur man använder konverteraren
+---------------------------------
+
+Förutsättningar
+
+Du behöver:
+
+Python 3
+se02_prm_to_syx.py
+mapping.json
+
+samt:
+
+en PRM-fil
+en template-patch (.syx)
+
+Template-patchen används bara för att kopiera SysEx-struktur och adresser.
+
+
+
+Steg 1 – välj en template-patch
+
+Exportera en valfri patch från synthen.
+
+Exempel:
+
+template.syx
+
+Den används som bas för SysEx-strukturen.
+
+
+
+Steg 2 – välj PRM-fil
+
+Exempel:
+
+SE02_PATCH60.PRM
+
+Den innehåller alla parameter-värden.
+
+
+
+Steg 3 – kör konverteraren
+
+I terminal:
+
+python3 se02_prm_to_syx.py \
+--prm SE02_PATCH60.PRM \
+--template template.syx \
+--out patch60.syx \
+--slot-display 60
+
+
+Programmet gör då:
+
+PRM parameters
+→ payload bytes
+→ nibble encode
+→ insert into DT1 SysEx
+→ recalc Roland checksum
+
+
+
+Steg 4 – använd patchen
+
+Den genererade filen:
+
+patch60.syx
+
+kan nu:
+
+- importeras i KnobKraft Orm
+- skickas via MIDI
+- sparas i patch-librarian
+
+
+
+3. Viktiga begränsningar
+------------------------
+
+Följande parametrar lagras inte i patch-payloaden:
+
+COM_OCT
+COM_TRNS
+COM_PWM_DEPTH
+COM_PWM_RATE
+
+De fungerar istället som:
+
+performance / realtime controls
+
+och skickas endast som MIDI-controller-data.
+
+Det innebär att dessa värden inte påverkar SysEx patch dumps.
+
+
+
+4. Resultat
+-----------
+
+Efter reverse engineering kunde följande verifieras:
+
+Patch payload size: 120 bytes
+Resolved parameters: 56
+Unresolved (not stored): 4
+
+Konverteraren är därför deterministisk för alla patch-lagrade parametrar.
+
+
+
+5. Framtida utveckling (V2)
+---------------------------
+
+Planerade förbättringar:
+
+- batch-konvertering av hela patchbanker
+- automatisk template-generering
+- direkt PRM → Orm-import
+- GUI-version
