@@ -1,71 +1,163 @@
 # SE-02 PRM → SYX Converter (prm2syx)
 
-Detta projekt löser ett konkret glapp i Roland SE-02-flödet:
+This project solves a practical gap in the Roland SE-02 workflow.
 
-- SE-02 kan göra USB-backup i PRM-format (Mass Storage).
-- Librarians/editors (t.ex. Orm) jobbar med SysEx (SYX).
-- Roland erbjuder ingen officiell PRM → SYX-konvertering.
+The SE-02 can export patches as **PRM files** through its USB mass-storage backup mode, while most librarians and editors (for example **KnobKraft Orm**) work with **SysEx (.syx)** patch dumps.
 
-prm2syx konverterar därför SE-02 PRM (text/parameterlista) till en valid SE-02 patch SysEx dump (4 × Roland DT1).
+Roland does not provide an official way to convert PRM files into SysEx.
+
+**prm2syx** fills that gap by converting a Roland SE-02 **PRM parameter file** into a valid **SE-02 SysEx patch dump** (4 × Roland DT1 messages).
+
+---
 
 ## Status
 
-- Version: 2.0.0
-- Canonical CLI: bin/prm2syx
+- Version: **2.0.0**
+- Canonical CLI tool: `bin/prm2syx`
 
-## Snabbstart
+---
 
-  cd bin
-  ./prm2syx --version
+## Quick start
 
-## Användning
+From the project root:
 
-Konvertera en PRM-fil:
-  ./prm2syx SE02_PATCH60.PRM
+```bash
+cd bin
+./prm2syx --version
+```
 
-Slot autodetekteras från filnamn som t.ex.:
-  SE02_PATCH60.PRM
-  PATCH60.PRM
-  PATCH_60.PRM
-  PATCH 60.PRM
-  60.PRM / 060.PRM
+---
 
-Om filnamnet inte innehåller slot, ange manuellt:
-  ./prm2syx MySound.PRM --slot 60
+## Usage
 
-Batch (mapp, icke-rekursivt):
-  ./prm2syx /path/to/PATCH/
+### Convert a single PRM file
 
-Batch (många filer):
-  ./prm2syx *.PRM
+```bash
+./prm2syx SE02_PATCH60.PRM
+```
 
-## Output-regler
+The patch slot is automatically detected from filenames such as:
 
-- Single-file: output skrivs bredvid PRM-filen (default).
-- Batch (flera filer eller folder-input): output skrivs i out_sysex/ (default) i den mapp där du kör kommandot.
+```text
+SE02_PATCH60.PRM
+PATCH60.PRM
+PATCH_60.PRM
+PATCH 60.PRM
+60.PRM
+060.PRM
+```
 
-Välj egen output-folder:
-  ./prm2syx PATCH/ --outdir /path/to/out_sysex
+If the filename does not contain a slot number, you can specify it manually:
 
---out används bara vid single-file:
-  ./prm2syx SE02_PATCH60.PRM --out out.syx
+```bash
+./prm2syx MySound.PRM --slot 60
+```
 
-## Template (valfritt)
+---
 
-  ./prm2syx SE02_PATCH60.PRM --template some_patch_dump.syx
+## Batch conversion
 
-## Begränsningar / kända not stored
+Convert all PRM files in a folder (non-recursive):
 
-- COM_OCT
-- COM_TRNS
-- COM_PWM_DEPTH
-- COM_PWM_RATE
+```bash
+./prm2syx /path/to/PATCH/
+```
 
-## Testdata
+Convert multiple files:
 
-Testfiler finns i `test/`.
+```bash
+./prm2syx *.PRM
+```
 
-Exempel:
+---
 
-  cd bin
-  ./prm2syx ../test/TEST.PRM --slot 60
+## Output behavior
+
+**Single file conversion**
+
+Output is written next to the input PRM file by default.
+
+**Batch conversion**
+
+Output files are written to:
+
+```text
+out_sysex/
+```
+
+in the directory where the command is executed.
+
+You can choose a custom output folder:
+
+```bash
+./prm2syx PATCH/ --outdir /path/to/out_sysex
+```
+
+For single-file conversion you may specify an explicit output file:
+
+```bash
+./prm2syx SE02_PATCH60.PRM --out output.syx
+```
+
+---
+
+## Optional template
+
+The converter contains an embedded default patch template.
+
+If you want to base the conversion on a specific patch dump instead, you can supply a template SysEx file:
+
+```bash
+./prm2syx SE02_PATCH60.PRM --template some_patch_dump.syx
+```
+
+---
+
+## Known limitations
+
+The following parameters appear **not to be stored in the SE-02 patch payload** and are therefore ignored during conversion:
+
+```text
+COM_OCT
+COM_TRNS
+COM_PWM_DEPTH
+COM_PWM_RATE
+```
+
+These behave more like UI or performance parameters rather than stored patch data.
+
+---
+
+## Test files
+
+Example test files are available in the `test/` directory.
+
+Example:
+
+```bash
+cd bin
+./prm2syx ../test/TEST.PRM --slot 60
+```
+
+---
+
+## Project goal
+
+The long-term goal of this project is to make SE-02 patch data more accessible for:
+
+- librarian software
+- patch analysis
+- automated patch generation
+- integration with SE-02 tooling (for example KnobKraft Orm adaptations)
+
+Future directions may include:
+
+- a graphical version of the converter
+- direct integration with editor/librarian workflows
+- patch morphing tools
+
+---
+
+## License
+
+See the `LICENSE` file included in this repository.
