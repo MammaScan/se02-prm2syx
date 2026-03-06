@@ -1,5 +1,15 @@
 # SE-02 PRM → SYX Converter (prm2syx)
 
+## Download
+
+For non-technical users, the easiest way to get this tool is via the **Releases** page:
+
+https://github.com/MammaScan/se02-prm2syx/releases
+
+If you just want the current CLI script directly, download:
+
+https://raw.githubusercontent.com/MammaScan/se02-prm2syx/main/bin/prm2syx
+
 This project solves a practical gap in the Roland SE-02 workflow.
 
 The SE-02 can export patches as **PRM files** through its USB mass-storage backup mode, while most librarians and editors (for example **KnobKraft Orm**) work with **SysEx (.syx)** patch dumps.
