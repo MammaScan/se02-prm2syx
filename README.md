@@ -17,6 +17,27 @@ Roland does not provide an official way to convert PRM files into SysEx.
 
 ---
 
+## What's new in v2
+
+This release establishes the **canonical PRM → SYX converter** and introduces the first graphical prototype.
+
+New in this version:
+
+- Canonical CLI converter: `bin/prm2syx`
+- First GUI prototype: `dev/gui_v1.py`
+- Clean project structure
+- Dedicated test directory with reference patches
+
+Planned next steps:
+
+- Patch **Evolve** mode
+- GUI improvements
+- Possible integration with SE‑02 librarian workflows (e.g. KnobKraft Orm)
+
+---
+
+---
+
 ## Quick start
 
 From the project root:
